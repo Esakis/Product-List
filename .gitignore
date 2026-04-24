@@ -204,6 +204,7 @@ secrets.json
 *.pid
 *.seed
 *.pid.lock
+*.txt
 
 # =========================
 # OS
