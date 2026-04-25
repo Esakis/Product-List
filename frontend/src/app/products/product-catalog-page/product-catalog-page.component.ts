@@ -16,6 +16,8 @@ const DEFAULT_PAGE_SIZE = 20;
 const FILTER_DEBOUNCE_MS = 300;
 const DEFAULT_PAGE = 1;
 
+export type CatalogTab = 'add' | 'search';
+
 interface CatalogState {
   result: PagedResult<Product> | null;
   error: string | null;
@@ -47,6 +49,7 @@ export class ProductCatalogPageComponent {
   readonly code = signal('');
   readonly name = signal('');
   readonly page = signal(DEFAULT_PAGE);
+  readonly activeTab = signal<CatalogTab>('search');
   private readonly versionTrigger = signal(0);
 
   private readonly state = toSignal(this.buildQueryStream(), { initialValue: INITIAL_STATE });
@@ -83,6 +86,10 @@ export class ProductCatalogPageComponent {
 
   onProductAdded(): void {
     this.versionTrigger.update(version => version + 1);
+  }
+
+  selectTab(tab: CatalogTab): void {
+    this.activeTab.set(tab);
   }
 
   reload(): void {

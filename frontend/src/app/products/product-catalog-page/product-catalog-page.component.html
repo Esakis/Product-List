@@ -5,15 +5,44 @@
   </header>
 
   <div class="catalog__layout">
-    <app-product-form (productAdded)="onProductAdded()" />
+    <aside class="catalog__sidebar">
+      <nav class="catalog__tabs" role="tablist" aria-label="Sidebar sections">
+        <button
+          type="button"
+          role="tab"
+          class="catalog__tab"
+          [class.catalog__tab--active]="activeTab() === 'add'"
+          [attr.aria-selected]="activeTab() === 'add'"
+          (click)="selectTab('add')"
+        >
+          Add product
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="catalog__tab"
+          [class.catalog__tab--active]="activeTab() === 'search'"
+          [attr.aria-selected]="activeTab() === 'search'"
+          (click)="selectTab('search')"
+        >
+          Search products
+        </button>
+      </nav>
+
+      <div class="catalog__panel">
+        @if (activeTab() === 'add') {
+          <app-product-form (productAdded)="onProductAdded()" />
+        } @else {
+          <app-product-filter-bar
+            [code]="code()"
+            [name]="name()"
+            (filterChange)="onFilterChange($event)"
+          />
+        }
+      </div>
+    </aside>
 
     <div class="catalog__content">
-      <app-product-filter-bar
-        [code]="code()"
-        [name]="name()"
-        (filterChange)="onFilterChange($event)"
-      />
-
       @if (loading()) {
         <app-spinner label="Loading products..." />
       } @else if (error()) {
