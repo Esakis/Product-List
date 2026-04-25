@@ -1,4 +1,4 @@
-namespace ProductList.Api.Features.Products;
+namespace ProductList.Api.Models;
 
 public sealed class Product
 {

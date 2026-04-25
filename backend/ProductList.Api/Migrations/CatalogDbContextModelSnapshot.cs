@@ -21,7 +21,7 @@ namespace ProductList.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ProductList.Api.Features.Products.Product", b =>
+            modelBuilder.Entity("ProductList.Api.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

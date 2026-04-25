@@ -2,8 +2,10 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ProductList.Api.Common.ExceptionHandling;
-using ProductList.Api.Features.Products;
 using ProductList.Api.Infrastructure.Persistence;
+using ProductList.Api.Repositories;
+using ProductList.Api.Services;
+using ProductList.Api.Validators;
 
 const string AngularDevCorsPolicy = "AngularDev";
 const string AngularDevOrigin = "http://localhost:4200";
@@ -19,6 +21,9 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
+
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -62,6 +67,6 @@ else
 
 app.UseCors(AngularDevCorsPolicy);
 
-app.MapProductEndpoints();
+app.MapControllers();
 
 app.Run();

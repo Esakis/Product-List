@@ -1,4 +1,6 @@
-namespace ProductList.Api.Features.Products;
+using ProductList.Api.Models;
+
+namespace ProductList.Api.Repositories;
 
 public interface IProductRepository
 {

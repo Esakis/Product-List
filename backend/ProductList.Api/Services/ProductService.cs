@@ -1,7 +1,9 @@
 using FluentValidation;
 using ProductList.Api.Common.Errors;
+using ProductList.Api.Models;
+using ProductList.Api.Repositories;
 
-namespace ProductList.Api.Features.Products;
+namespace ProductList.Api.Services;
 
 public sealed class ProductService : IProductService
 {

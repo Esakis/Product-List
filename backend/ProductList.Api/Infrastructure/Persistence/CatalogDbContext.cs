@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using ProductList.Api.Features.Products;
+using ProductList.Api.Infrastructure.Persistence.Configurations;
+using ProductList.Api.Models;
 
 namespace ProductList.Api.Infrastructure.Persistence;
 

@@ -1,8 +1,9 @@
 using FluentAssertions;
 using FluentValidation.TestHelper;
-using ProductList.Api.Features.Products;
+using ProductList.Api.Models;
+using ProductList.Api.Validators;
 
-namespace ProductList.Api.Tests.Features.Products;
+namespace ProductList.Api.Tests.Validators;
 
 public sealed class CreateProductRequestValidatorTests
 {

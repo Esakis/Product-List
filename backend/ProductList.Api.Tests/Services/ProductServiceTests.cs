@@ -2,9 +2,12 @@ using FluentAssertions;
 using FluentValidation;
 using NSubstitute;
 using ProductList.Api.Common.Errors;
-using ProductList.Api.Features.Products;
+using ProductList.Api.Models;
+using ProductList.Api.Repositories;
+using ProductList.Api.Services;
+using ProductList.Api.Validators;
 
-namespace ProductList.Api.Tests.Features.Products;
+namespace ProductList.Api.Tests.Services;
 
 public sealed class ProductServiceTests
 {

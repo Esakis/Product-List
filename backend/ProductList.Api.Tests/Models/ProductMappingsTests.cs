@@ -1,7 +1,7 @@
 using FluentAssertions;
-using ProductList.Api.Features.Products;
+using ProductList.Api.Models;
 
-namespace ProductList.Api.Tests.Features.Products;
+namespace ProductList.Api.Tests.Models;
 
 public sealed class ProductMappingsTests
 {

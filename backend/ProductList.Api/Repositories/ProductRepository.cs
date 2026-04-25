@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using ProductList.Api.Infrastructure.Persistence;
+using ProductList.Api.Models;
 
-namespace ProductList.Api.Features.Products;
+namespace ProductList.Api.Repositories;
 
 public sealed class ProductRepository : IProductRepository
 {

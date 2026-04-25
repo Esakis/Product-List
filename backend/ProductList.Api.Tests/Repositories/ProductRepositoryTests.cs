@@ -1,9 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using ProductList.Api.Features.Products;
 using ProductList.Api.Infrastructure.Persistence;
+using ProductList.Api.Models;
+using ProductList.Api.Repositories;
 
-namespace ProductList.Api.Tests.Features.Products;
+namespace ProductList.Api.Tests.Repositories;
 
 public sealed class ProductRepositoryTests
 {

@@ -1,6 +1,7 @@
 using FluentValidation;
+using ProductList.Api.Models;
 
-namespace ProductList.Api.Features.Products;
+namespace ProductList.Api.Validators;
 
 public sealed class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
 {
