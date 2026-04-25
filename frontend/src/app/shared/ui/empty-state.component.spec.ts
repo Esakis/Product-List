@@ -8,12 +8,28 @@ describe('EmptyStateComponent', () => {
     }).compileComponents();
   });
 
-  it('should create', () => {
+  it('renders the title', () => {
     const fixture = TestBed.createComponent(EmptyStateComponent);
     fixture.componentRef.setInput('title', 'Nothing here yet');
-    expect(fixture.componentInstance).toBeTruthy();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.empty-state__title')?.textContent).toBe('Nothing here yet');
   });
 
-  xit('renders the title', () => {});
-  xit('omits description when not provided', () => {});
+  it('omits the description when not provided', () => {
+    const fixture = TestBed.createComponent(EmptyStateComponent);
+    fixture.componentRef.setInput('title', 'Nothing');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.empty-state__description')).toBeNull();
+  });
+
+  it('renders the description when provided', () => {
+    const fixture = TestBed.createComponent(EmptyStateComponent);
+    fixture.componentRef.setInput('title', 'Nothing');
+    fixture.componentRef.setInput('description', 'Add the first product.');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.empty-state__description')?.textContent).toBe('Add the first product.');
+  });
 });

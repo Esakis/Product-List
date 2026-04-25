@@ -8,11 +8,20 @@ describe('SpinnerComponent', () => {
     }).compileComponents();
   });
 
-  it('should create', () => {
+  it('renders the default label', () => {
     const fixture = TestBed.createComponent(SpinnerComponent);
-    expect(fixture.componentInstance).toBeTruthy();
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).querySelector('.spinner__label')?.textContent ?? '';
+    expect(text).toBe('Loading...');
   });
 
-  xit('renders the default label', () => {});
-  xit('renders a custom label via input', () => {});
+  it('renders a custom label via input', () => {
+    const fixture = TestBed.createComponent(SpinnerComponent);
+    fixture.componentRef.setInput('label', 'Loading products...');
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).querySelector('.spinner__label')?.textContent ?? '';
+    expect(text).toBe('Loading products...');
+  });
 });
