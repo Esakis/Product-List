@@ -1,0 +1,18 @@
+@if (products().length === 0) {
+  <app-empty-state
+    title="No products yet"
+    description="Add the first product to see it appear here."
+  />
+} @else {
+  <ul class="product-list">
+    @for (product of products(); track product.id) {
+      <li class="product-card">
+        <div class="product-card__code">{{ product.code }}</div>
+        <h3 class="product-card__name">{{ product.name }}</h3>
+        <div class="product-card__price">
+          {{ product.price | currency:'PLN':'symbol':'1.2-2' }}
+        </div>
+      </li>
+    }
+  </ul>
+}

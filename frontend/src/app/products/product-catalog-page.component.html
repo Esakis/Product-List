@@ -1,0 +1,20 @@
+<section class="catalog container">
+  <header class="catalog__header">
+    <h1 class="catalog__title">Product catalog</h1>
+    <p class="catalog__subtitle">Browse the catalog and add new products.</p>
+  </header>
+
+  <div class="catalog__layout">
+    <app-product-form (productAdded)="onProductAdded($event)" />
+
+    <div class="catalog__content">
+      @if (loading()) {
+        <app-spinner label="Loading products..." />
+      } @else if (error()) {
+        <app-error-banner [message]="error()!" (retry)="reload()" />
+      } @else {
+        <app-product-list [products]="products()" />
+      }
+    </div>
+  </div>
+</section>

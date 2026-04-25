@@ -1,0 +1,19 @@
+<div class="notification-host" role="status" aria-live="polite">
+  @for (notification of notifications(); track notification.id) {
+    <div
+      class="notification"
+      [ngClass]="'notification--' + notification.kind"
+      (click)="dismiss(notification.id)"
+    >
+      <span class="notification__message">{{ notification.message }}</span>
+      <button
+        type="button"
+        class="notification__close"
+        aria-label="Dismiss notification"
+        (click)="dismiss(notification.id); $event.stopPropagation()"
+      >
+        &times;
+      </button>
+    </div>
+  }
+</div>
