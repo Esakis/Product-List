@@ -9,9 +9,9 @@ import {
   Validators
 } from '@angular/forms';
 
-import { NotificationService } from '../core/notifications/notification.service';
-import { Product } from './product.model';
-import { ProductService } from './product.service';
+import { NotificationService } from '../../core/notifications/notification.service';
+import { Product } from '../product.model';
+import { ProductService } from '../product.service';
 
 const CODE_PATTERN = /^[A-Za-z0-9\-]+$/;
 const CODE_MAX_LENGTH = 50;

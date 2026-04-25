@@ -4,9 +4,9 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { ProductFormComponent } from './product-form.component';
-import { ProductService } from './product.service';
-import { NotificationService } from '../core/notifications/notification.service';
-import { Product } from './product.model';
+import { ProductService } from '../product.service';
+import { NotificationService } from '../../core/notifications/notification.service';
+import { Product } from '../product.model';
 
 describe('ProductFormComponent', () => {
   let productService: jasmine.SpyObj<ProductService>;

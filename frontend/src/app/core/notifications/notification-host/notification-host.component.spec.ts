@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NotificationHostComponent } from './notification-host.component';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '../notification.service';
 
 describe('NotificationHostComponent', () => {
   let notifications: NotificationService;

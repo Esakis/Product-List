@@ -3,14 +3,14 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, startWith, switchMap, tap } from 'rxjs';
 
-import { ErrorBannerComponent } from '../shared/ui/error-banner.component';
-import { SpinnerComponent } from '../shared/ui/spinner.component';
-import { ProductFilterBarComponent, ProductFilterValues } from './product-filter-bar.component';
-import { ProductFormComponent } from './product-form.component';
-import { ProductListComponent } from './product-list.component';
-import { ProductPaginatorComponent } from './product-paginator.component';
-import { PagedResult, Product, ProductQuery } from './product.model';
-import { ProductService } from './product.service';
+import { ErrorBannerComponent } from '../../shared/ui/error-banner/error-banner.component';
+import { SpinnerComponent } from '../../shared/ui/spinner/spinner.component';
+import { ProductFilterBarComponent, ProductFilterValues } from '../product-filter-bar/product-filter-bar.component';
+import { ProductFormComponent } from '../product-form/product-form.component';
+import { ProductListComponent } from '../product-list/product-list.component';
+import { ProductPaginatorComponent } from '../product-paginator/product-paginator.component';
+import { PagedResult, Product, ProductQuery } from '../product.model';
+import { ProductService } from '../product.service';
 
 const DEFAULT_PAGE_SIZE = 20;
 const FILTER_DEBOUNCE_MS = 300;

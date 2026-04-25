@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ProductListComponent } from './product-list.component';
-import { Product } from './product.model';
+import { Product } from '../product.model';
 
 describe('ProductListComponent', () => {
   beforeEach(async () => {

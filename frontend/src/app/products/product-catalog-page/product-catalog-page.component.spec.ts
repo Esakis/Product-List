@@ -6,8 +6,8 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 
 import { ProductCatalogPageComponent } from './product-catalog-page.component';
-import { ProductService } from './product.service';
-import { PagedResult, Product } from './product.model';
+import { ProductService } from '../product.service';
+import { PagedResult, Product } from '../product.model';
 
 const FILTER_DEBOUNCE_MS = 300;
 

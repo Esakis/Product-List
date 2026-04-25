@@ -5,7 +5,7 @@ export const routes: Routes = [
   {
     path: 'products',
     loadComponent: () =>
-      import('./products/product-catalog-page.component').then(m => m.ProductCatalogPageComponent)
+      import('./products/product-catalog-page/product-catalog-page.component').then(m => m.ProductCatalogPageComponent)
   },
   { path: '**', redirectTo: 'products' }
 ];

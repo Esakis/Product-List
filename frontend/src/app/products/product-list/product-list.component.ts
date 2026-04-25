@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 
-import { EmptyStateComponent } from '../shared/ui/empty-state.component';
-import { Product } from './product.model';
+import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import { Product } from '../product.model';
 
 @Component({
   selector: 'app-product-list',
