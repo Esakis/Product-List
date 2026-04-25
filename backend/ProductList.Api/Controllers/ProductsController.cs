@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProductList.Api.Common.Paging;
 using ProductList.Api.Models;
 using ProductList.Api.Services;
 
@@ -22,6 +23,17 @@ public sealed class ProductsController : ControllerBase
     {
         var products = await _productService.GetAllAsync(cancellationToken);
         return Ok(products);
+    }
+
+    [HttpGet("search")]
+    [ProducesResponseType<PagedResult<ProductDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedResult<ProductDto>>> Search(
+        [FromQuery] ProductQueryRequest query,
+        CancellationToken cancellationToken)
+    {
+        var result = await _productService.SearchAsync(query, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]

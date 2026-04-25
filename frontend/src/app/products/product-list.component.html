@@ -1,7 +1,7 @@
 @if (products().length === 0) {
   <app-empty-state
-    title="No products yet"
-    description="Add the first product to see it appear here."
+    [title]="emptyTitle()"
+    [description]="emptyDescription()"
   />
 } @else {
   <ul class="product-list">

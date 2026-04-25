@@ -14,4 +14,6 @@ import { Product } from './product.model';
 })
 export class ProductListComponent {
   readonly products = input.required<Product[]>();
+  readonly emptyTitle = input<string>('No products yet');
+  readonly emptyDescription = input<string>('Add the first product to see it appear here.');
 }

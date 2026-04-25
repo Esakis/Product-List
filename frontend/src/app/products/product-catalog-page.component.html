@@ -5,15 +5,32 @@
   </header>
 
   <div class="catalog__layout">
-    <app-product-form (productAdded)="onProductAdded($event)" />
+    <app-product-form (productAdded)="onProductAdded()" />
 
     <div class="catalog__content">
+      <app-product-filter-bar
+        [code]="code()"
+        [name]="name()"
+        (filterChange)="onFilterChange($event)"
+      />
+
       @if (loading()) {
         <app-spinner label="Loading products..." />
       } @else if (error()) {
         <app-error-banner [message]="error()!" (retry)="reload()" />
       } @else {
-        <app-product-list [products]="products()" />
+        <app-product-list
+          [products]="products()"
+          [emptyTitle]="emptyTitle()"
+          [emptyDescription]="emptyDescription()"
+        />
+
+        <app-product-paginator
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [total]="total()"
+          (pageChange)="onPageChange($event)"
+        />
       }
     </div>
   </div>

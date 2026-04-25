@@ -1,0 +1,39 @@
+<form class="filter-bar" (submit)="$event.preventDefault()">
+  <div class="filter-bar__field">
+    <label class="filter-bar__label" for="filter-code">Code</label>
+    <input
+      id="filter-code"
+      class="filter-bar__input"
+      type="text"
+      autocomplete="off"
+      [value]="code()"
+      [attr.maxlength]="codeMaxLength"
+      [attr.pattern]="codePattern"
+      placeholder="e.g. PRD-001"
+      (input)="onCodeInput($any($event.target).value)"
+    />
+  </div>
+
+  <div class="filter-bar__field">
+    <label class="filter-bar__label" for="filter-name">Name</label>
+    <input
+      id="filter-name"
+      class="filter-bar__input"
+      type="text"
+      autocomplete="off"
+      [value]="name()"
+      [attr.maxlength]="nameMaxLength"
+      placeholder="e.g. coffee"
+      (input)="onNameInput($any($event.target).value)"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="filter-bar__clear"
+    [disabled]="!hasActiveFilters()"
+    (click)="clear()"
+  >
+    Clear filters
+  </button>
+</form>

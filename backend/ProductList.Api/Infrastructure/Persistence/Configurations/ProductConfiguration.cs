@@ -28,6 +28,8 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasMaxLength(NameMaxLength);
 
+        builder.HasIndex(product => product.Name);
+
         builder.Property(product => product.Price)
             .HasPrecision(PricePrecision, PriceScale);
 

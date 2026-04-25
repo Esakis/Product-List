@@ -2,6 +2,7 @@ using FluentAssertions;
 using FluentValidation;
 using NSubstitute;
 using ProductList.Api.Common.Errors;
+using ProductList.Api.Common.Paging;
 using ProductList.Api.Models;
 using ProductList.Api.Repositories;
 using ProductList.Api.Services;
@@ -12,12 +13,13 @@ namespace ProductList.Api.Tests.Services;
 public sealed class ProductServiceTests
 {
     private readonly IProductRepository _repository = Substitute.For<IProductRepository>();
-    private readonly IValidator<CreateProductRequest> _validator = new CreateProductRequestValidator();
+    private readonly IValidator<CreateProductRequest> _createValidator = new CreateProductRequestValidator();
+    private readonly IValidator<ProductQueryRequest> _queryValidator = new ProductQueryRequestValidator();
     private readonly ProductService _service;
 
     public ProductServiceTests()
     {
-        _service = new ProductService(_repository, _validator);
+        _service = new ProductService(_repository, _createValidator, _queryValidator);
     }
 
     [Fact]
@@ -35,6 +37,39 @@ public sealed class ProductServiceTests
         result.Should().HaveCount(2);
         result[0].Should().BeEquivalentTo(new ProductDto(1, "PRD-001", "Coffee", 49.99m));
         result[1].Should().BeEquivalentTo(new ProductDto(2, "PRD-002", "Tea", 24.50m));
+    }
+
+    [Fact]
+    public async Task SearchAsync_returns_paged_dtos_mapped_from_repository()
+    {
+        var filter = new ProductQueryRequest("PRD", null, 1, 10);
+        var products = new List<Product>
+        {
+            new() { Id = 1, Code = "PRD-001", Name = "Coffee", Price = 49.99m },
+            new() { Id = 2, Code = "PRD-002", Name = "Tea", Price = 24.50m }
+        };
+        _repository.GetPagedAsync(filter, Arg.Any<CancellationToken>())
+            .Returns(new PagedResult<Product>(products, 2, 1, 10));
+
+        var result = await _service.SearchAsync(filter, CancellationToken.None);
+
+        result.Total.Should().Be(2);
+        result.Page.Should().Be(1);
+        result.PageSize.Should().Be(10);
+        result.Items.Should().HaveCount(2);
+        result.Items[0].Should().BeEquivalentTo(new ProductDto(1, "PRD-001", "Coffee", 49.99m));
+        result.Items[1].Should().BeEquivalentTo(new ProductDto(2, "PRD-002", "Tea", 24.50m));
+    }
+
+    [Fact]
+    public async Task SearchAsync_throws_validation_exception_for_invalid_filter()
+    {
+        var filter = new ProductQueryRequest("PRD 001", null);
+
+        var act = () => _service.SearchAsync(filter, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ValidationException>();
+        await _repository.DidNotReceive().GetPagedAsync(Arg.Any<ProductQueryRequest>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

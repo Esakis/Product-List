@@ -1,12 +1,27 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, startWith, switchMap, tap } from 'rxjs';
 
 import { ErrorBannerComponent } from '../shared/ui/error-banner.component';
 import { SpinnerComponent } from '../shared/ui/spinner.component';
+import { ProductFilterBarComponent, ProductFilterValues } from './product-filter-bar.component';
 import { ProductFormComponent } from './product-form.component';
 import { ProductListComponent } from './product-list.component';
-import { Product } from './product.model';
+import { ProductPaginatorComponent } from './product-paginator.component';
+import { PagedResult, Product, ProductQuery } from './product.model';
 import { ProductService } from './product.service';
+
+const DEFAULT_PAGE_SIZE = 20;
+const FILTER_DEBOUNCE_MS = 300;
+const DEFAULT_PAGE = 1;
+
+interface CatalogState {
+  result: PagedResult<Product> | null;
+  error: string | null;
+}
+
+const INITIAL_STATE: CatalogState = { result: null, error: null };
 
 @Component({
   selector: 'app-product-catalog-page',
@@ -15,7 +30,9 @@ import { ProductService } from './product.service';
     SpinnerComponent,
     ErrorBannerComponent,
     ProductFormComponent,
-    ProductListComponent
+    ProductFilterBarComponent,
+    ProductListComponent,
+    ProductPaginatorComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product-catalog-page.component.html',
@@ -23,44 +40,110 @@ import { ProductService } from './product.service';
 })
 export class ProductCatalogPageComponent {
   private readonly productService = inject(ProductService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  readonly products = signal<Product[]>([]);
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
+  readonly pageSize = signal(DEFAULT_PAGE_SIZE);
+  readonly code = signal('');
+  readonly name = signal('');
+  readonly page = signal(DEFAULT_PAGE);
+  private readonly versionTrigger = signal(0);
+
+  private readonly state = toSignal(this.buildQueryStream(), { initialValue: INITIAL_STATE });
+
+  readonly products = computed(() => this.state().result?.items ?? []);
+  readonly total = computed(() => this.state().result?.total ?? 0);
+  readonly loading = computed(() => this.state().result === null && this.state().error === null);
+  readonly error = computed(() => this.state().error);
+  readonly hasActiveFilters = computed(() => this.code().length > 0 || this.name().length > 0);
+  readonly emptyTitle = computed(() => this.hasActiveFilters() ? 'No matching products' : 'No products yet');
+  readonly emptyDescription = computed(() =>
+    this.hasActiveFilters()
+      ? 'Try adjusting the Code or Name filter.'
+      : 'Add the first product to see it appear here.'
+  );
 
   constructor() {
-    this.loadProducts();
+    this.seedFromUrl();
   }
 
-  onProductAdded(product: Product): void {
-    this.products.update(existing => this.appendAndSortByName(existing, product));
+  onFilterChange(values: ProductFilterValues): void {
+    const codeChanged = values.code !== this.code();
+    const nameChanged = values.name !== this.name();
+    this.code.set(values.code);
+    this.name.set(values.name);
+    if (codeChanged || nameChanged) {
+      this.page.set(DEFAULT_PAGE);
+    }
+  }
+
+  onPageChange(page: number): void {
+    this.page.set(page);
+  }
+
+  onProductAdded(): void {
+    this.versionTrigger.update(version => version + 1);
   }
 
   reload(): void {
-    this.loadProducts();
+    this.versionTrigger.update(version => version + 1);
   }
 
-  private loadProducts(): void {
-    this.loading.set(true);
-    this.error.set(null);
+  private buildQueryStream() {
+    const code$ = toObservable(this.code).pipe(debounceTime(FILTER_DEBOUNCE_MS), distinctUntilChanged());
+    const name$ = toObservable(this.name).pipe(debounceTime(FILTER_DEBOUNCE_MS), distinctUntilChanged());
+    const page$ = toObservable(this.page).pipe(distinctUntilChanged());
+    const pageSize$ = toObservable(this.pageSize).pipe(distinctUntilChanged());
+    const trigger$ = toObservable(this.versionTrigger);
 
-    this.productService
-      .getAll()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: items => {
-          this.products.set(items);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Unable to load products.');
-          this.loading.set(false);
-        }
-      });
+    return combineLatest([code$, name$, page$, pageSize$, trigger$]).pipe(
+      tap(([code, name, page, pageSize]) => this.syncUrl({ code, name, page, pageSize })),
+      switchMap(([code, name, page, pageSize]) => {
+        const query: ProductQuery = { code, name, page, pageSize };
+        return this.productService.search(query).pipe(
+          map(result => ({ result, error: null as string | null })),
+          startWith(INITIAL_STATE),
+          catchError(() => of({ result: null, error: 'Unable to load products.' }))
+        );
+      }),
+      takeUntilDestroyed()
+    );
   }
 
-  private appendAndSortByName(existing: Product[], added: Product): Product[] {
-    return [...existing, added].sort((a, b) => a.name.localeCompare(b.name));
+  private seedFromUrl(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const code = params.get('code') ?? '';
+    const name = params.get('name') ?? '';
+    const page = this.parsePositiveInt(params.get('page'), DEFAULT_PAGE);
+    const pageSize = this.parsePositiveInt(params.get('pageSize'), DEFAULT_PAGE_SIZE);
+
+    this.code.set(code);
+    this.name.set(name);
+    this.page.set(page);
+    this.pageSize.set(pageSize);
+  }
+
+  private syncUrl(query: ProductQuery): void {
+    const queryParams: Record<string, string | number | null> = {
+      code: query.code.length > 0 ? query.code : null,
+      name: query.name.length > 0 ? query.name : null,
+      page: query.page,
+      pageSize: query.pageSize
+    };
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  private parsePositiveInt(raw: string | null, fallback: number): number {
+    if (raw === null) {
+      return fallback;
+    }
+    const parsed = Number.parseInt(raw, 10);
+    return Number.isFinite(parsed) && parsed >= 1 ? parsed : fallback;
   }
 }
+

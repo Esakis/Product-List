@@ -10,3 +10,17 @@ export interface CreateProductRequest {
   name: string;
   price: number;
 }
+
+export interface ProductQuery {
+  code: string;
+  name: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
