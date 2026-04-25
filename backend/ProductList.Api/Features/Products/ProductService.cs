@@ -31,6 +31,11 @@ public sealed class ProductService : IProductService
             throw new ConflictException($"A product with code '{request.Code}' already exists.");
         }
 
+        if (await _productRepository.ExistsByNameAsync(request.Name, cancellationToken))
+        {
+            throw new ConflictException($"A product with name '{request.Name}' already exists.");
+        }
+
         var created = await _productRepository.AddAsync(request.ToEntity(), cancellationToken);
         return created.ToDto();
     }

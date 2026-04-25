@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../notifications/notification.service';
 
-const DUPLICATE_CODE_MESSAGE = 'A product with this Code already exists.';
+const CONFLICT_FALLBACK_MESSAGE = 'A product with this Code or Name already exists.';
 const UNREACHABLE_MESSAGE = 'Unable to reach the server.';
 const SERVER_ERROR_MESSAGE = 'An unexpected server error occurred.';
 const VALIDATION_PREFIX = 'Validation error';
@@ -27,7 +27,8 @@ function mapErrorToMessage(error: HttpErrorResponse): string {
     return buildValidationMessage(error);
   }
   if (error.status === 409) {
-    return DUPLICATE_CODE_MESSAGE;
+    const detail = typeof error.error?.detail === 'string' ? error.error.detail : undefined;
+    return detail ?? CONFLICT_FALLBACK_MESSAGE;
   }
   return SERVER_ERROR_MESSAGE;
 }

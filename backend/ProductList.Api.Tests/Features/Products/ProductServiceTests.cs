@@ -35,10 +35,11 @@ public sealed class ProductServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_persists_request_and_returns_dto_for_unique_code()
+    public async Task CreateAsync_persists_request_and_returns_dto_for_unique_code_and_name()
     {
         var request = new CreateProductRequest("PRD-100", "New Product", 12.34m);
         _repository.ExistsByCodeAsync("PRD-100", Arg.Any<CancellationToken>()).Returns(false);
+        _repository.ExistsByNameAsync("New Product", Arg.Any<CancellationToken>()).Returns(false);
         _repository.AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>())
             .Returns(callInfo =>
             {
@@ -51,6 +52,7 @@ public sealed class ProductServiceTests
 
         result.Should().BeEquivalentTo(new ProductDto(42, "PRD-100", "New Product", 12.34m));
         await _repository.Received(1).ExistsByCodeAsync("PRD-100", Arg.Any<CancellationToken>());
+        await _repository.Received(1).ExistsByNameAsync("New Product", Arg.Any<CancellationToken>());
         await _repository.Received(1).AddAsync(
             Arg.Is<Product>(p => p.Code == "PRD-100" && p.Name == "New Product" && p.Price == 12.34m),
             Arg.Any<CancellationToken>());
@@ -78,6 +80,20 @@ public sealed class ProductServiceTests
 
         var exception = await act.Should().ThrowAsync<ConflictException>();
         exception.Which.Message.Should().Contain("PRD-001");
+        await _repository.DidNotReceive().AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreateAsync_throws_conflict_when_name_already_exists()
+    {
+        var request = new CreateProductRequest("PRD-999", "Existing Name", 10m);
+        _repository.ExistsByCodeAsync("PRD-999", Arg.Any<CancellationToken>()).Returns(false);
+        _repository.ExistsByNameAsync("Existing Name", Arg.Any<CancellationToken>()).Returns(true);
+
+        var act = () => _service.CreateAsync(request, CancellationToken.None);
+
+        var exception = await act.Should().ThrowAsync<ConflictException>();
+        exception.Which.Message.Should().Contain("Existing Name");
         await _repository.DidNotReceive().AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());
     }
 }

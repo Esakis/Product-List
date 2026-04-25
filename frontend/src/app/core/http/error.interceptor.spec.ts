@@ -55,11 +55,21 @@ describe('errorInterceptor', () => {
     expect(notifications.error).toHaveBeenCalledWith('Validation error: Invalid payload.');
   });
 
-  it('shows the duplicate code message on 409', () => {
+  it('shows the detail message from server on 409', () => {
+    http.post('/api/x', {}).subscribe({ error: () => undefined });
+    httpMock.expectOne('/api/x').flush(
+      { detail: "A product with code 'PRD-001' already exists." },
+      { status: 409, statusText: 'Conflict' }
+    );
+
+    expect(notifications.error).toHaveBeenCalledWith("A product with code 'PRD-001' already exists.");
+  });
+
+  it('shows a fallback conflict message on 409 when detail is absent', () => {
     http.post('/api/x', {}).subscribe({ error: () => undefined });
     httpMock.expectOne('/api/x').flush({}, { status: 409, statusText: 'Conflict' });
 
-    expect(notifications.error).toHaveBeenCalledWith('A product with this Code already exists.');
+    expect(notifications.error).toHaveBeenCalledWith('A product with this Code or Name already exists.');
   });
 
   it('shows the unreachable message on status 0', () => {

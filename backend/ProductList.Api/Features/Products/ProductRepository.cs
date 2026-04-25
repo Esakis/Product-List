@@ -27,6 +27,13 @@ public sealed class ProductRepository : IProductRepository
             .AnyAsync(product => product.Code == code, cancellationToken);
     }
 
+    public Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        return _dbContext.Products
+            .AsNoTracking()
+            .AnyAsync(product => product.Name == name, cancellationToken);
+    }
+
     public async Task<Product> AddAsync(Product product, CancellationToken cancellationToken)
     {
         await _dbContext.Products.AddAsync(product, cancellationToken);

@@ -56,6 +56,30 @@ public sealed class ProductRepositoryTests
     }
 
     [Fact]
+    public async Task ExistsByNameAsync_returns_true_for_existing_name()
+    {
+        await using var dbContext = CreateDbContext();
+        dbContext.Products.Add(new Product { Code = "PRD-001", Name = "Existing Name", Price = 10m });
+        await dbContext.SaveChangesAsync();
+        var repository = new ProductRepository(dbContext);
+
+        var exists = await repository.ExistsByNameAsync("Existing Name", CancellationToken.None);
+
+        exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ExistsByNameAsync_returns_false_for_unknown_name()
+    {
+        await using var dbContext = CreateDbContext();
+        var repository = new ProductRepository(dbContext);
+
+        var exists = await repository.ExistsByNameAsync("Unknown Name", CancellationToken.None);
+
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task AddAsync_persists_product_and_assigns_identifier()
     {
         await using var dbContext = CreateDbContext();

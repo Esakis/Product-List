@@ -4,5 +4,6 @@ public interface IProductRepository
 {
     Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken);
     Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
+    Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken);
     Task<Product> AddAsync(Product product, CancellationToken cancellationToken);
 }
