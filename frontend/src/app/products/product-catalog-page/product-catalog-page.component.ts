@@ -10,6 +10,7 @@ import { ProductFormComponent } from '../product-form/product-form.component';
 import { ProductListComponent } from '../product-list/product-list.component';
 import { ProductPaginatorComponent } from '../product-paginator/product-paginator.component';
 import { PagedResult, Product, ProductQuery } from '../product.model';
+import { ProductRealtimeService } from '../product-realtime.service';
 import { ProductService } from '../product.service';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -42,6 +43,7 @@ const INITIAL_STATE: CatalogState = { result: null, error: null };
 })
 export class ProductCatalogPageComponent {
   private readonly productService = inject(ProductService);
+  private readonly productRealtimeService = inject(ProductRealtimeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -68,6 +70,13 @@ export class ProductCatalogPageComponent {
 
   constructor() {
     this.seedFromUrl();
+    this.subscribeToRealtimeUpdates();
+  }
+
+  private subscribeToRealtimeUpdates(): void {
+    this.productRealtimeService.productAdded$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.versionTrigger.update(version => version + 1));
   }
 
   onFilterChange(values: ProductFilterValues): void {

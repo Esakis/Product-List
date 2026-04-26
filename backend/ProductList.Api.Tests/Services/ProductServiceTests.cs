@@ -15,11 +15,12 @@ public sealed class ProductServiceTests
     private readonly IProductRepository _repository = Substitute.For<IProductRepository>();
     private readonly IValidator<CreateProductRequest> _createValidator = new CreateProductRequestValidator();
     private readonly IValidator<ProductQueryRequest> _queryValidator = new ProductQueryRequestValidator();
+    private readonly IProductEventPublisher _eventPublisher = Substitute.For<IProductEventPublisher>();
     private readonly ProductService _service;
 
     public ProductServiceTests()
     {
-        _service = new ProductService(_repository, _createValidator, _queryValidator);
+        _service = new ProductService(_repository, _createValidator, _queryValidator, _eventPublisher);
     }
 
     [Fact]
@@ -94,6 +95,38 @@ public sealed class ProductServiceTests
         await _repository.Received(1).AddAsync(
             Arg.Is<Product>(p => p.Code == "PRD-100" && p.Name == "New Product" && p.Price == 12.34m),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreateAsync_publishes_product_added_event_after_persisting()
+    {
+        var request = new CreateProductRequest("PRD-200", "Realtime Item", 9.99m);
+        _repository.ExistsByCodeAsync("PRD-200", Arg.Any<CancellationToken>()).Returns(false);
+        _repository.ExistsByNameAsync("Realtime Item", Arg.Any<CancellationToken>()).Returns(false);
+        _repository.AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var product = callInfo.Arg<Product>();
+                product.Id = 7;
+                return product;
+            });
+
+        await _service.CreateAsync(request, CancellationToken.None);
+
+        await _eventPublisher.Received(1).NotifyProductAddedAsync(
+            Arg.Is<ProductDto>(dto => dto.Id == 7 && dto.Code == "PRD-200" && dto.Name == "Realtime Item" && dto.Price == 9.99m),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreateAsync_does_not_publish_event_when_validation_fails()
+    {
+        var request = new CreateProductRequest("", "", 0m);
+
+        var act = () => _service.CreateAsync(request, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ValidationException>();
+        await _eventPublisher.DidNotReceive().NotifyProductAddedAsync(Arg.Any<ProductDto>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

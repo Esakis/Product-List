@@ -11,15 +11,18 @@ public sealed class ProductService : IProductService
     private readonly IProductRepository _productRepository;
     private readonly IValidator<CreateProductRequest> _createProductRequestValidator;
     private readonly IValidator<ProductQueryRequest> _productQueryRequestValidator;
+    private readonly IProductEventPublisher _productEventPublisher;
 
     public ProductService(
         IProductRepository productRepository,
         IValidator<CreateProductRequest> createProductRequestValidator,
-        IValidator<ProductQueryRequest> productQueryRequestValidator)
+        IValidator<ProductQueryRequest> productQueryRequestValidator,
+        IProductEventPublisher productEventPublisher)
     {
         _productRepository = productRepository;
         _createProductRequestValidator = createProductRequestValidator;
         _productQueryRequestValidator = productQueryRequestValidator;
+        _productEventPublisher = productEventPublisher;
     }
 
     public async Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken)
@@ -52,6 +55,8 @@ public sealed class ProductService : IProductService
         }
 
         var created = await _productRepository.AddAsync(request.ToEntity(), cancellationToken);
-        return created.ToDto();
+        var dto = created.ToDto();
+        await _productEventPublisher.NotifyProductAddedAsync(dto, cancellationToken);
+        return dto;
     }
 }

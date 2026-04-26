@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ProductList.Api.Common.ExceptionHandling;
+using ProductList.Api.Hubs;
 using ProductList.Api.Infrastructure.Persistence;
 using ProductList.Api.Repositories;
 using ProductList.Api.Services;
@@ -20,7 +21,10 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddSingleton<IProductEventPublisher, SignalRProductEventPublisher>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
@@ -33,7 +37,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(AngularDevCorsPolicy, policy => policy
         .WithOrigins(AngularDevOrigin)
         .WithMethods("GET", "POST")
-        .AllowAnyHeader());
+        .AllowAnyHeader()
+        .AllowCredentials());
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -68,5 +73,6 @@ else
 app.UseCors(AngularDevCorsPolicy);
 
 app.MapControllers();
+app.MapHub<ProductsHub>("/hubs/products");
 
 app.Run();

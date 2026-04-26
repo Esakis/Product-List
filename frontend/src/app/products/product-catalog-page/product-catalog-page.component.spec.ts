@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 
 import { ProductCatalogPageComponent } from './product-catalog-page.component';
+import { ProductRealtimeService } from '../product-realtime.service';
 import { ProductService } from '../product.service';
 import { PagedResult, Product } from '../product.model';
 
@@ -19,6 +20,8 @@ describe('ProductCatalogPageComponent', () => {
   let productService: jasmine.SpyObj<ProductService>;
   let router: jasmine.SpyObj<Router>;
   let routeQueryParamMap: ReturnType<typeof convertToParamMap>;
+  let realtimeProductAdded: Subject<Product>;
+  let realtimeService: { productAdded$: ReturnType<Subject<Product>['asObservable']> };
 
   function setQueryParams(params: Record<string, string>): void {
     routeQueryParamMap = convertToParamMap(params);
@@ -32,6 +35,7 @@ describe('ProductCatalogPageComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ProductService, useValue: productService },
+        { provide: ProductRealtimeService, useValue: realtimeService },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -45,6 +49,8 @@ describe('ProductCatalogPageComponent', () => {
     productService = jasmine.createSpyObj<ProductService>('ProductService', ['getAll', 'create', 'search']);
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
     router.navigate.and.resolveTo(true);
+    realtimeProductAdded = new Subject<Product>();
+    realtimeService = { productAdded$: realtimeProductAdded.asObservable() };
     setQueryParams({});
   });
 
@@ -144,6 +150,19 @@ describe('ProductCatalogPageComponent', () => {
     productService.search.calls.reset();
 
     component.onProductAdded();
+    tick(FILTER_DEBOUNCE_MS);
+
+    expect(productService.search).toHaveBeenCalledTimes(1);
+  }));
+
+  it('refetches when a realtime productAdded event arrives', fakeAsync(async () => {
+    productService.search.and.returnValue(of(pagedResult([])));
+    await configure();
+    createComponent();
+    tick(FILTER_DEBOUNCE_MS);
+    productService.search.calls.reset();
+
+    realtimeProductAdded.next({ id: 9, code: 'PRD-009', name: 'Realtime', price: 1.0 });
     tick(FILTER_DEBOUNCE_MS);
 
     expect(productService.search).toHaveBeenCalledTimes(1);
