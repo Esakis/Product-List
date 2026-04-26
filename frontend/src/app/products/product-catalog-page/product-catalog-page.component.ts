@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, startWith, switchMap, tap } from 'rxjs';
+import { Observable, catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 
 import { ErrorBannerComponent } from '../../shared/ui/error-banner/error-banner.component';
 import { SpinnerComponent } from '../../shared/ui/spinner/spinner.component';
@@ -105,7 +105,7 @@ export class ProductCatalogPageComponent {
     this.versionTrigger.update(version => version + 1);
   }
 
-  private buildQueryStream() {
+  private buildQueryStream(): Observable<CatalogState> {
     const code$ = toObservable(this.code).pipe(debounceTime(FILTER_DEBOUNCE_MS), distinctUntilChanged());
     const name$ = toObservable(this.name).pipe(debounceTime(FILTER_DEBOUNCE_MS), distinctUntilChanged());
     const page$ = toObservable(this.page).pipe(distinctUntilChanged());
@@ -117,9 +117,8 @@ export class ProductCatalogPageComponent {
       switchMap(([code, name, page, pageSize]) => {
         const query: ProductQuery = { code, name, page, pageSize };
         return this.productService.search(query).pipe(
-          map(result => ({ result, error: null as string | null })),
-          startWith(INITIAL_STATE),
-          catchError(() => of({ result: null, error: 'Unable to load products.' }))
+          map((result): CatalogState => ({ result, error: null })),
+          catchError(() => of<CatalogState>({ result: null, error: 'Unable to load products.' }))
         );
       }),
       takeUntilDestroyed()

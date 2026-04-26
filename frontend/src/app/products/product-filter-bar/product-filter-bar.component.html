@@ -1,4 +1,8 @@
-<form class="filter-bar" (submit)="$event.preventDefault()">
+<form
+  class="filter-bar"
+  [class.filter-bar--clearing]="isClearing()"
+  (submit)="$event.preventDefault()"
+>
   <div class="filter-bar__field">
     <label class="filter-bar__label" for="filter-code">Code</label>
     <input
@@ -9,6 +13,7 @@
       [value]="code()"
       [attr.maxlength]="codeMaxLength"
       [attr.pattern]="codePattern"
+      [attr.readonly]="isClearing() ? '' : null"
       placeholder="e.g. PRD-001"
       (input)="onCodeInput($any($event.target).value)"
     />
@@ -23,6 +28,7 @@
       autocomplete="off"
       [value]="name()"
       [attr.maxlength]="nameMaxLength"
+      [attr.readonly]="isClearing() ? '' : null"
       placeholder="e.g. coffee"
       (input)="onNameInput($any($event.target).value)"
     />
@@ -31,7 +37,7 @@
   <button
     type="button"
     class="filter-bar__clear"
-    [disabled]="!hasActiveFilters()"
+    [disabled]="!hasActiveFilters() || isClearing()"
     (click)="clear()"
   >
     Clear filters

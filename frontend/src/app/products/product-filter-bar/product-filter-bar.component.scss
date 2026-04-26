@@ -32,8 +32,14 @@
   border-radius: var(--radius-md);
   background: var(--color-background);
   color: var(--color-text);
+  caret-color: var(--color-text);
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease, box-shadow 120ms ease, color 400ms ease, caret-color 400ms ease;
+}
+
+.filter-bar--clearing .filter-bar__input {
+  color: transparent;
+  caret-color: transparent;
 }
 
 .filter-bar__input:focus {
