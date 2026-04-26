@@ -30,15 +30,29 @@
       </nav>
 
       <div class="catalog__panel">
-        @if (activeTab() === 'add') {
-          <app-product-form (productAdded)="onProductAdded()" />
-        } @else {
-          <app-product-filter-bar
-            [code]="code()"
-            [name]="name()"
-            (filterChange)="onFilterChange($event)"
-          />
-        }
+        <div
+          class="catalog__panel-flipper"
+          [class.catalog__panel-flipper--search]="activeTab() === 'search'"
+        >
+          <div
+            class="catalog__panel-face catalog__panel-face--add"
+            [attr.aria-hidden]="activeTab() !== 'add'"
+            [attr.inert]="activeTab() !== 'add' ? '' : null"
+          >
+            <app-product-form (productAdded)="onProductAdded()" />
+          </div>
+          <div
+            class="catalog__panel-face catalog__panel-face--search"
+            [attr.aria-hidden]="activeTab() !== 'search'"
+            [attr.inert]="activeTab() !== 'search' ? '' : null"
+          >
+            <app-product-filter-bar
+              [code]="code()"
+              [name]="name()"
+              (filterChange)="onFilterChange($event)"
+            />
+          </div>
+        </div>
       </div>
     </aside>
 

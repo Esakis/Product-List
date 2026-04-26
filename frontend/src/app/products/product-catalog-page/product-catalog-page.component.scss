@@ -74,7 +74,44 @@
 }
 
 .catalog__panel {
+  position: relative;
   display: block;
+  perspective: 1400px;
+}
+
+.catalog__panel-flipper {
+  position: relative;
+  display: grid;
+  grid-template: 1fr / 1fr;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  transform: rotateY(0);
+  transition: transform 500ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.catalog__panel-flipper--search {
+  transform: rotateY(-90deg);
+}
+
+.catalog__panel-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-origin: center center;
+  transition: opacity 250ms ease;
+}
+
+.catalog__panel-face--add {
+  transform: rotateY(0deg);
+}
+
+.catalog__panel-face--search {
+  transform: rotateY(90deg);
+}
+
+.catalog__panel-flipper:not(.catalog__panel-flipper--search) .catalog__panel-face--search,
+.catalog__panel-flipper--search .catalog__panel-face--add {
+  opacity: 0;
 }
 
 .catalog__content {
