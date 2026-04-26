@@ -32,7 +32,7 @@ export class ProductRealtimeService {
       this.productAddedSubject.next(product);
     });
 
-    this.connection.start().catch(() => undefined);
+    this.connection.start().catch(err => console.warn('SignalR connection failed:', err));
   }
 
   private disconnect(): void {

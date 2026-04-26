@@ -13,13 +13,22 @@ const string AngularDevOrigin = "http://localhost:4200";
 
 var builder = WebApplication.CreateBuilder(args);
 
-var catalogConnectionString = builder.Configuration.GetConnectionString("Catalog")
-    ?? throw new InvalidOperationException("Connection string 'Catalog' is not configured.");
+var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryRepository");
 
-builder.Services.AddDbContext<CatalogDbContext>(options =>
-    options.UseSqlServer(catalogConnectionString));
+if (useInMemory)
+{
+    builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
+}
+else
+{
+    var catalogConnectionString = builder.Configuration.GetConnectionString("Catalog")
+        ?? throw new InvalidOperationException("Connection string 'Catalog' is not configured.");
 
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddDbContext<CatalogDbContext>(options =>
+        options.UseSqlServer(catalogConnectionString));
+
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+}
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddSingleton<IProductEventPublisher, SignalRProductEventPublisher>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
@@ -61,9 +70,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    await dbContext.Database.MigrateAsync();
+    if (!useInMemory)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        await dbContext.Database.MigrateAsync();
+    }
 }
 else
 {

@@ -56,8 +56,19 @@ cd frontend && npm install && npm start
 | -------- | ------------------------------------------------------------- |
 | Backend  | ASP.NET Core 8 · EF Core · FluentValidation · SignalR         |
 | Frontend | Angular 18 (standalone, signals) · RxJS · SignalR client      |
-| Database | MSSQL via `(localdb)\MSSQLLocalDB`, code-first migrations     |
+| Database | In-memory (default) or MSSQL via `(localdb)\MSSQLLocalDB`     |
 | Tests    | xUnit + FluentAssertions + NSubstitute · Karma + Jasmine      |
+
+### Repository modes
+
+The app ships with **two interchangeable `IProductRepository` implementations** selectable via `appsettings.json`:
+
+| `UseInMemoryRepository` | Implementation               | Notes                                  |
+| ----------------------- | ---------------------------- | -------------------------------------- |
+| `true` *(default)*      | `InMemoryProductRepository`  | Zero external dependencies, instant start |
+| `false`                 | `ProductRepository` (EF Core)| Requires SQL Server LocalDB, runs migrations on startup |
+
+To switch to SQL Server, set `"UseInMemoryRepository": false` in `appsettings.Development.json` and ensure the connection string is valid.
 
 ---
 
