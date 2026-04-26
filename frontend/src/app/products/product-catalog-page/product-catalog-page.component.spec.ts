@@ -11,6 +11,7 @@ import { ProductService } from '../product.service';
 import { PagedResult, Product } from '../product.model';
 
 const FILTER_DEBOUNCE_MS = 300;
+const SPLASH_DURATION_MS = 2000;
 
 function pagedResult(items: Product[], total = items.length, page = 1, pageSize = 20): PagedResult<Product> {
   return { items, total, page, pageSize };
@@ -153,7 +154,7 @@ describe('ProductCatalogPageComponent', () => {
     tick(FILTER_DEBOUNCE_MS);
 
     expect(productService.search).toHaveBeenCalledTimes(1);
-    tick(1000);
+    tick(SPLASH_DURATION_MS);
   }));
 
   it('refetches when a realtime productAdded event arrives', fakeAsync(async () => {

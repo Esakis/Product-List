@@ -1,7 +1,9 @@
 import { ComponentRef } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { ProductFilterBarComponent, ProductFilterValues } from './product-filter-bar.component';
+
+const CLEAR_FADE_DURATION_MS = 400;
 
 describe('ProductFilterBarComponent', () => {
   let fixture: ComponentFixture<ProductFilterBarComponent>;
@@ -42,21 +44,23 @@ describe('ProductFilterBarComponent', () => {
     expect(emissions).toEqual([{ code: 'PRD', name: 'coffee' }]);
   });
 
-  it('clears both fields and emits empty values when there are active filters', () => {
+  it('clears both fields and emits empty values when there are active filters', fakeAsync(() => {
     componentRef.setInput('code', 'PRD');
     componentRef.setInput('name', 'coffee');
     fixture.detectChanges();
 
     component.clear();
+    tick(CLEAR_FADE_DURATION_MS);
 
     expect(emissions).toEqual([{ code: '', name: '' }]);
-  });
+  }));
 
-  it('does not emit when clear is called with no active filters', () => {
+  it('does not emit when clear is called with no active filters', fakeAsync(() => {
     component.clear();
+    tick(CLEAR_FADE_DURATION_MS);
 
     expect(emissions).toEqual([]);
-  });
+  }));
 
   it('reports active filters when either code or name is non-empty', () => {
     componentRef.setInput('code', '');
