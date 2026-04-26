@@ -153,6 +153,7 @@ describe('ProductCatalogPageComponent', () => {
     tick(FILTER_DEBOUNCE_MS);
 
     expect(productService.search).toHaveBeenCalledTimes(1);
+    tick(1000);
   }));
 
   it('refetches when a realtime productAdded event arrives', fakeAsync(async () => {

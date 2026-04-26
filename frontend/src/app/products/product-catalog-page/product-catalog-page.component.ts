@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
@@ -16,6 +16,7 @@ import { ProductService } from '../product.service';
 const DEFAULT_PAGE_SIZE = 20;
 const FILTER_DEBOUNCE_MS = 300;
 const DEFAULT_PAGE = 1;
+const SPLASH_DURATION_MS = 2000;
 
 export type CatalogTab = 'add' | 'search';
 
@@ -46,13 +47,16 @@ export class ProductCatalogPageComponent {
   private readonly productRealtimeService = inject(ProductRealtimeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   readonly code = signal('');
   readonly name = signal('');
   readonly page = signal(DEFAULT_PAGE);
   readonly activeTab = signal<CatalogTab>('search');
+  readonly splashCounter = signal(0);
   private readonly versionTrigger = signal(0);
+  private splashTimer: ReturnType<typeof setTimeout> | null = null;
 
   private readonly state = toSignal(this.buildQueryStream(), { initialValue: INITIAL_STATE });
 
@@ -71,6 +75,7 @@ export class ProductCatalogPageComponent {
   constructor() {
     this.seedFromUrl();
     this.subscribeToRealtimeUpdates();
+    this.destroyRef.onDestroy(() => this.clearSplashTimer());
   }
 
   private subscribeToRealtimeUpdates(): void {
@@ -95,6 +100,26 @@ export class ProductCatalogPageComponent {
 
   onProductAdded(): void {
     this.versionTrigger.update(version => version + 1);
+    this.fireSplash();
+  }
+
+  private fireSplash(): void {
+    this.clearSplashTimer();
+    this.splashCounter.set(0);
+    queueMicrotask(() => {
+      this.splashCounter.update(counter => counter + 1);
+      this.splashTimer = setTimeout(() => {
+        this.splashCounter.set(0);
+        this.splashTimer = null;
+      }, SPLASH_DURATION_MS);
+    });
+  }
+
+  private clearSplashTimer(): void {
+    if (this.splashTimer !== null) {
+      clearTimeout(this.splashTimer);
+      this.splashTimer = null;
+    }
   }
 
   selectTab(tab: CatalogTab): void {

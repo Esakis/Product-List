@@ -126,3 +126,44 @@
     align-items: start;
   }
 }
+
+.catalog__splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.catalog__splash-drop {
+  display: block;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #d8ecff 0%, #6ec1ff 55%, #3a9ae8 100%);
+  box-shadow: 0 0 80px rgba(110, 193, 255, 0.7);
+  animation: catalog-splash-drop 1s ease-out forwards;
+}
+
+@keyframes catalog-splash-drop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog__splash-drop {
+    animation-duration: 1ms;
+  }
+}
